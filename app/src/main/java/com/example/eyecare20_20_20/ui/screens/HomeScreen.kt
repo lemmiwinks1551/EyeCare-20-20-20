@@ -26,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.eyecare20_20_20.ui.theme.GreenColor
+import com.example.eyecare20_20_20.ui.theme.RedColor
 import kotlinx.coroutines.delay
 
 @Composable
@@ -86,8 +88,7 @@ fun TimerDisplay(progress: Float, currentTime: Long, modifier: Modifier) {
         Text(
             text = convertMsToString(currentTime),
             fontSize = 44.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -107,7 +108,7 @@ fun CircularProgress(progress: Float, modifier: Modifier) {
             style = Stroke(strokeWidth, cap = StrokeCap.Round)
         )
         drawArc(
-            color = Color.Green,
+            color = GreenColor,
             startAngle = -215f,
             sweepAngle = 250f * progress,
             useCenter = false,
@@ -131,8 +132,8 @@ fun TimerControls(
             onClick = onStartPause,
             colors = ButtonDefaults.buttonColors(
                 containerColor =
-                if (!isTimeRunning) Color.Green // Если таймер не включен
-                else Color.Red
+                if (!isTimeRunning) GreenColor // Если таймер не включен
+                else RedColor
             ),
             enabled = !timeout
         ) {
@@ -144,7 +145,7 @@ fun TimerControls(
         Button(
             onClick = onReset,
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Red
+                containerColor = RedColor
             )
         ) {
             Text("Сброс")
