@@ -29,8 +29,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.eyecare20_20_20.model.BottomNavItem
-import com.example.eyecare20_20_20.ui.screens.HomeScreen
-import com.example.eyecare20_20_20.ui.screens.SettingsScreen
+import com.example.eyecare20_20_20.ui.navigation.Routes
+import com.example.eyecare20_20_20.ui.screens.home.HomeScreen
+import com.example.eyecare20_20_20.ui.screens.settings.SettingsScreen
 import com.example.eyecare20_20_20.ui.theme.EyeCare202020Theme
 
 class MainActivity : ComponentActivity() {

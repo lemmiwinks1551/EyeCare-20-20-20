@@ -1,4 +1,4 @@
-package com.example.eyecare20_20_20.ui.screens
+package com.example.eyecare20_20_20.ui.screens.settings
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
