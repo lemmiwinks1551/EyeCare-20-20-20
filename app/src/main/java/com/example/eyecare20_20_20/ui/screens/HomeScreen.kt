@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -42,7 +41,7 @@ fun HomeScreen() {
 
 @Composable
 fun TimerScreen() {
-    val totalTime by remember { mutableStateOf(20L * 60000L) } // 20 минут
+    val totalTime by remember { mutableStateOf(1L * 2000L) } // 20 минут
     var currentTime by remember { mutableStateOf(totalTime) }
     var isTimeRunning by remember { mutableStateOf(false) }
     var progress by remember { mutableStateOf(1f) }
@@ -63,6 +62,7 @@ fun TimerScreen() {
         )
         TimerControls(
             isTimeRunning = isTimeRunning,
+            currentTime,
             onStartPause = {
                 if (currentTime <= 0L) {
                     currentTime = totalTime
@@ -70,8 +70,7 @@ fun TimerScreen() {
                 } else {
                     isTimeRunning = !isTimeRunning
                 }
-            },
-            onReset = {
+            }, onReset = {
                 currentTime = totalTime
                 isTimeRunning = false
                 progress = 1f
@@ -119,19 +118,33 @@ fun CircularProgress(progress: Float, modifier: Modifier) {
 }
 
 @Composable
-fun TimerControls(isTimeRunning: Boolean, onStartPause: () -> Unit, onReset: () -> Unit) {
+fun TimerControls(
+    isTimeRunning: Boolean,
+    currentTime: Long,
+    onStartPause: () -> Unit,
+    onReset: () -> Unit
+) {
+    val timeout = currentTime == 0L
+
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         Button(
             onClick = onStartPause,
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (!isTimeRunning) Color.Green else Color.Red
-            )
+                containerColor =
+                if (!isTimeRunning) Color.Green // Если таймер не включен
+                else Color.Red
+            ),
+            enabled = !timeout
         ) {
-            Text(if (isTimeRunning) "Пауза" else "Старт")
+            Text(
+                if (isTimeRunning) "Пауза"
+                else "Старт"
+            )
         }
         Button(
-            onClick = onReset, colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Gray
+            onClick = onReset,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Red
             )
         ) {
             Text("Сброс")
