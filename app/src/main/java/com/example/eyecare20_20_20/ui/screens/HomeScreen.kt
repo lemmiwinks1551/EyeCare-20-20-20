@@ -1,7 +1,10 @@
 package com.example.eyecare20_20_20.ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -18,114 +21,49 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 @Composable
-@Preview(
-    showBackground = true
-)
+@Preview(showBackground = true)
 fun HomeScreen() {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
-        Timer(
-            totalTime = 100L * 1000L,
-            handleColor = Color.Green,
-            inactiveBarColor = Color.DarkGray,
-            activeBarColor = Color(0xFF37B900),
-            modifier = Modifier.size(200.dp)
-        )
+        TimerScreen()
     }
 }
 
 @Composable
-private fun Timer(
-    totalTime: Long,
-    handleColor: Color,
-    inactiveBarColor: Color,
-    activeBarColor: Color,
-    modifier: Modifier = Modifier,
-    initialValue: Float = 1f,
-    strokeWidth: Dp = 5.dp
-) {
-    var size by remember {
-        mutableStateOf(IntSize.Zero)
-    }
-    var value by remember {
-        mutableStateOf(initialValue)
-    }
-    var currentTime by remember {
-        mutableStateOf(totalTime)
-    }
-    var isTimeRunning by remember {
-        mutableStateOf(false)
-    }
+fun TimerScreen() {
+    val totalTime by remember { mutableStateOf(20L * 60000L) } // 20 минут
+    var currentTime by remember { mutableStateOf(totalTime) }
+    var isTimeRunning by remember { mutableStateOf(false) }
+    var progress by remember { mutableStateOf(1f) }
 
-    LaunchedEffect(key1 = currentTime, key2 = isTimeRunning) {
+    LaunchedEffect(currentTime, isTimeRunning) {
         if (currentTime > 0 && isTimeRunning) {
-            delay(100L)
-            currentTime -= 100L
-            value = currentTime / totalTime.toFloat()
+            delay(1000L)
+            currentTime -= 1000L
+            progress = currentTime / totalTime.toFloat()
         }
     }
 
-    Box(contentAlignment = Alignment.Center,
-        modifier = modifier
-            .onSizeChanged {
-                size = it
-            }) {
-        Canvas(modifier = modifier) {
-            drawArc(
-                color = inactiveBarColor,
-                startAngle = -215f,
-                sweepAngle = 250f,
-                useCenter = false,
-                size = Size(size.width.toFloat(), size.height.toFloat()),
-                style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
-            )
-            drawArc(
-                color = activeBarColor,
-                startAngle = -215f,
-                sweepAngle = 250f * value,
-                useCenter = false,
-                size = Size(size.width.toFloat(), size.height.toFloat()),
-                style = Stroke(strokeWidth.toPx(), cap = StrokeCap.Round)
-            )
-            val center = Offset(size.width / 2f, size.height / 2f)
-            val beta = (250f * value + 145f) * (PI / 180f).toFloat()
-            val r = size.width / 2f
-            val a = cos(beta) * r
-            val b = sin(beta) * r
-            drawPoints(
-                listOf(Offset(center.x + a, center.y + b)),
-                pointMode = PointMode.Points,
-                color = handleColor,
-                strokeWidth = (strokeWidth * 3f).toPx(),
-                cap = StrokeCap.Round
-            )
-        }
-        Text(
-            text = (currentTime).toString(),
-            fontSize = 44.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        TimerDisplay(
+            progress = progress,
+            currentTime = currentTime,
+            modifier = Modifier.size(200.dp)
         )
-        Button(
-            onClick = {
+        TimerControls(
+            isTimeRunning = isTimeRunning,
+            onStartPause = {
                 if (currentTime <= 0L) {
                     currentTime = totalTime
                     isTimeRunning = true
@@ -133,20 +71,81 @@ private fun Timer(
                     isTimeRunning = !isTimeRunning
                 }
             },
-            modifier = Modifier.align(Alignment.BottomCenter),
+            onReset = {
+                currentTime = totalTime
+                isTimeRunning = false
+                progress = 1f
+            }
+        )
+    }
+}
+
+@Composable
+fun TimerDisplay(progress: Float, currentTime: Long, modifier: Modifier) {
+    Box(contentAlignment = Alignment.Center, modifier = modifier) {
+        CircularProgress(progress = progress, modifier = modifier)
+        Text(
+            text = convertMsToString(currentTime),
+            fontSize = 44.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+    }
+}
+
+@Composable
+fun CircularProgress(progress: Float, modifier: Modifier) {
+    Canvas(modifier = modifier) {
+        val size = size.minDimension
+        val strokeWidth = 10.dp.toPx()
+
+        drawArc(
+            color = Color.DarkGray,
+            startAngle = -215f,
+            sweepAngle = 250f,
+            useCenter = false,
+            size = Size(size, size),
+            style = Stroke(strokeWidth, cap = StrokeCap.Round)
+        )
+        drawArc(
+            color = Color.Green,
+            startAngle = -215f,
+            sweepAngle = 250f * progress,
+            useCenter = false,
+            size = Size(size, size),
+            style = Stroke(strokeWidth, cap = StrokeCap.Round)
+        )
+    }
+}
+
+@Composable
+fun TimerControls(isTimeRunning: Boolean, onStartPause: () -> Unit, onReset: () -> Unit) {
+    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+        Button(
+            onClick = onStartPause,
             colors = ButtonDefaults.buttonColors(
-                containerColor = if (!isTimeRunning || currentTime <= 0L) {
-                    activeBarColor
-                } else {
-                    Color.Red
-                }
+                containerColor = if (!isTimeRunning) Color.Green else Color.Red
             )
         ) {
-            Text(
-                text = if (isTimeRunning && currentTime >= 0L) "Стоп"
-                else if (!isTimeRunning && currentTime >= 0L) "Старт"
-                else "Restart"
+            Text(if (isTimeRunning) "Пауза" else "Старт")
+        }
+        Button(
+            onClick = onReset, colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Gray
             )
+        ) {
+            Text("Сброс")
         }
     }
+}
+
+private fun convertMsToString(ms: Long): String {
+    val minutes = ms / 60000L
+    val seconds = ms % 60000L / 1000L
+    val secondsStr = if (seconds.toString().length == 1) {
+        "0${seconds}"
+    } else {
+        "$seconds"
+    }
+    return "$minutes:$secondsStr"
 }
