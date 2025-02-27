@@ -11,12 +11,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
@@ -28,14 +24,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.eyecare20_20_20.convertMsToString
 import com.example.eyecare20_20_20.ui.theme.GreenColor
 import com.example.eyecare20_20_20.ui.theme.RedColor
-import kotlinx.coroutines.delay
 
 @Preview(showBackground = true)
 @Composable
 fun HomeScreen(viewModel: TimerViewModel = viewModel()) {
-    // Подписываемся на `state` из TimerViewModel с помощью collectAsState()
+    // Функция collectAsState() преобразовывает StateFlow или LiveData в MutableState
+    // При изменении в StateFlow, меняется value внутри MutableState и функция перевызывается
     val state by viewModel.state.collectAsState()
 
     Box(
@@ -145,15 +142,4 @@ fun TimerControls(
             Text("Сброс")
         }
     }
-}
-
-private fun convertMsToString(ms: Long): String {
-    val minutes = ms / 60000L
-    val seconds = ms % 60000L / 1000L
-    val secondsStr = if (seconds.toString().length == 1) {
-        "0${seconds}"
-    } else {
-        "$seconds"
-    }
-    return "$minutes:$secondsStr"
 }

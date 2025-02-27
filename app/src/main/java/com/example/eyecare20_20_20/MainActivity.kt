@@ -101,21 +101,3 @@ fun bottomNavigation() {
         }
     }
 }
-
-@Composable
-private fun getNavigationItems(): List<BottomNavItem> {
-    return listOf(
-        BottomNavItem(
-            title = "Главная",
-            selectedIcon = Icons.Filled.Home,
-            unselectedIcon = Icons.Outlined.Home,
-            route = Routes.Home
-        ),
-        BottomNavItem(
-            title = "Настройки",
-            selectedIcon = Icons.Filled.Settings,
-            unselectedIcon = Icons.Outlined.Settings,
-            route = Routes.Settings
-        ),
-    )
-}
