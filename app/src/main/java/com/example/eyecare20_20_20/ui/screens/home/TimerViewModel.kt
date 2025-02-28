@@ -2,70 +2,71 @@ package com.example.eyecare20_20_20.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.eyecare20_20_20.model.HomeMviAction
+import com.example.eyecare20_20_20.model.HomeMviState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class TimerViewModel : ViewModel() {
     private lateinit var job: Job
+
     companion object {
-        const val TOTAL_TIME = 20 * 60 * 1000L // 20 минут
+        // const val TOTAL_TIME = 20 * 60 * 1000L
+        const val TOTAL_TIME = 3000L
     }
-    // TODO: почему то после нажатия на Сброс вычитает 1 секунду - 19:59
 
-    // Состояние таймера, которое будет храниться в StateFlow
+    // Состояние
+    private val _state = MutableStateFlow(HomeMviState())
+    val state: StateFlow<HomeMviState> = _state
 
-    // Приватный MutableStateFlow
-    private val _state = MutableStateFlow(TimerState())
-
-    // state — публичная версия, доступная для чтения
-    val state = _state.asStateFlow()
-
-    // Функция для старта/паузирования таймера
-    fun startPauseTimer() {
-        // Если таймер уже запущен, ставим его на паузу
-        if (_state.value.isRunning) {
-            _state.value = _state.value.copy(isRunning = false)
-        } else {
-            // Если таймер не запущен, запускаем его
-            _state.value = _state.value.copy(isRunning = true)
-            startTimer()
+    fun onAction(action: HomeMviAction) {
+        when (action) {
+            HomeMviAction.StartTimer -> startTimer()
+            HomeMviAction.PauseTimer -> pauseTimer()
+            HomeMviAction.ResetTimer -> resetTimer()
         }
     }
 
-    // Функция для сброса таймера
-    fun resetTimer() {
-        // сбрасываем состояние до начальных значений
-        job.cancel()
-        _state.value = TimerState()
-    }
-
-    // Функция для старта таймера (уменьшаем время каждую секунду)
     private fun startTimer() {
-        job = viewModelScope.launch { // используем viewModelScope для запуска корутины
-            // Пока время больше 0 и таймер не на паузе, продолжаем отсчитывать
-            while (_state.value.currentTime > 0 && _state.value.isRunning) {
-                delay(1000L) // задержка на 1 секунду
-                // Обновляем состояние: уменьшаем текущее время на 1 секунду и обновляем прогресс
-                _state.value = _state.value.copy(
-                    currentTime = _state.value.currentTime - 1000L, // уменьшаем время на 1 секунду
-                    progress = (_state.value.currentTime - 1000L) / TOTAL_TIME.toFloat() // обновляем прогресс
-                )
+        // Запускаем таймер, если он не запущен
+        if (!state.value.isRunning) {
+            _state.value = state.value.copy(isRunning = true) // Устанавилваем флаг
+
+            // Запускаем корутину
+            job = viewModelScope.launch {
+                // Пока время больше 0 и таймер не на паузе, продолжаем отсчитывать время
+                while (state.value.currentTime > 0 && state.value.isRunning) {
+                    // Обновляем состояние: уменьшаем текущее время на 1 секунду и обновляем прогресс
+                    delay(100L)
+                    _state.value = state.value.copy(
+                        currentTime = state.value.currentTime - 100L,
+                        progress = (state.value.currentTime - 100L) / TOTAL_TIME.toFloat()
+                    )
+
+                    // Проверяем, вышло ли время
+                    if (state.value.currentTime == 0L) {
+                        // Если время вышло - меняем название на кнопке
+                        _state.value = state.value.copy(
+                            timeout = true
+                        )
+                    }
+                }
             }
         }
     }
+
+    private fun pauseTimer() {
+        if (state.value.isRunning) {
+            _state.value = state.value.copy(isRunning = false)
+        }
+    }
+
+    private fun resetTimer() {
+        // сбрасываем состояние до начальных значений и отменяем корутину
+        job.cancel()
+        _state.value = HomeMviState()
+    }
 }
-
-// Data класс состояния таймера
-data class TimerState(
-    // начальное время таймера
-    val currentTime: Long = TimerViewModel.TOTAL_TIME,
-
-    // флаг, показывающий, запущен ли таймер
-    val isRunning: Boolean = false,
-
-    // прогресс от 0 до 1 (в зависимости от оставшегося времени)
-    val progress: Float = 1f
-)
