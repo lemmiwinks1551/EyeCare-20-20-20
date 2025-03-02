@@ -29,6 +29,30 @@ import com.example.eyecare20_20_20.model.HomeMviState
 import com.example.eyecare20_20_20.ui.theme.Purple40
 import com.example.eyecare20_20_20.ui.theme.PurpleGrey40
 
+/* Layout-дерево
+    HomeScreen
+    │
+    └── Box
+    │
+    └── TimerScreen
+    │
+    ├── Column
+    │   │
+    │   ├── TimerDisplay (Таймер)
+    │   │   │
+    │   │   ├── Box (Центрирует таймер)
+    │   │   │   │
+    │   │   │   ├── TimerProgress (Canvas - дуги)
+    │   │   │   └── Text (Текущий таймер)
+    │   │
+    │   └── TimerButtons (Кнопки)
+    │       │
+    │       └── Row (Горизонтальное расположение кнопок)
+    │           │
+    │           ├── Button ("Старт"/"Пауза")
+    │           └── Button ("Сброс")
+*/
+
 @Preview(showBackground = true)
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
