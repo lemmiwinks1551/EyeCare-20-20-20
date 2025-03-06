@@ -1,8 +1,13 @@
 package com.example.eyecare20_20_20
 
 import android.Manifest
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -32,12 +37,38 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.eyecare20_20_20.model.BottomNavItem
+import com.example.eyecare20_20_20.service.TimerService
 import com.example.eyecare20_20_20.ui.navigation.Routes
 import com.example.eyecare20_20_20.ui.screens.home.HomeScreen
 import com.example.eyecare20_20_20.ui.screens.settings.SettingsScreen
 import com.example.eyecare20_20_20.ui.theme.EyeCare202020Theme
+import com.example.eyecare20_20_20.utils.getNavigationItems
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private var isBound by mutableStateOf(false)
+    private lateinit var timerService: TimerService
+    private val connection = object : ServiceConnection {
+        // Мониторит состояние сервиса
+        override fun onServiceConnected(className: ComponentName, service: IBinder) {
+            val binder = service as TimerService.TimerBinder
+            timerService = binder.getService() // инстанс сервиса
+            isBound = true
+        }
+
+        override fun onServiceDisconnected(arg0: ComponentName) {
+            isBound = false
+        }
+    }
+
+    override fun onStart() {
+        Intent(this, TimerService::class.java).also { intent ->
+            bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
+        super.onStart()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -50,15 +81,23 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             EyeCare202020Theme {
-                bottomNavigation()
+                if (isBound) {
+                    bottomNavigation(timerService)
+                }
             }
         }
+    }
+
+    override fun onStop() {
+        super.onStop()
+        unbindService(connection)
+        isBound = false
     }
 }
 
 @Composable
-@Preview
-fun bottomNavigation() {
+@Preview()
+fun bottomNavigation(timerService: TimerService = TimerService()) {
     val navController = rememberNavController()
     val navItems = getNavigationItems()
     var selectedItemIndex by rememberSaveable { mutableStateOf(0) }
@@ -106,7 +145,7 @@ fun bottomNavigation() {
                 navController = navController,
                 startDestination = Routes.Home
             ) {
-                composable(Routes.Home) { HomeScreen() }
+                composable(Routes.Home) { HomeScreen(timerService = timerService) }
                 composable(Routes.Settings) { SettingsScreen() }
             }
         }

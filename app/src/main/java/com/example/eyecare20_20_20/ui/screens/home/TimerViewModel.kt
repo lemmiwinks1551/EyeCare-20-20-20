@@ -4,13 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.eyecare20_20_20.model.HomeMviAction
 import com.example.eyecare20_20_20.model.HomeMviState
+import com.example.eyecare20_20_20.service.TimerService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class TimerViewModel : ViewModel() {
+class TimerViewModel(timerService: TimerService?) : ViewModel() {
     private lateinit var job: Job
 
     companion object {
@@ -22,7 +23,7 @@ class TimerViewModel : ViewModel() {
     private val _state = MutableStateFlow(HomeMviState())
     val state: StateFlow<HomeMviState> = _state
 
-    fun onAction(action: HomeMviAction) {
+/*    fun onAction(action: HomeMviAction) {
         when (action) {
             HomeMviAction.StartTimer -> startTimer()
             HomeMviAction.PauseTimer -> pauseTimer()
@@ -68,5 +69,5 @@ class TimerViewModel : ViewModel() {
         // сбрасываем состояние до начальных значений и отменяем корутину
         job.cancel()
         _state.value = HomeMviState()
-    }
+    }*/
 }

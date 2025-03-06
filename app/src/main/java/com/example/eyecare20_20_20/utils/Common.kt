@@ -1,4 +1,4 @@
-package com.example.eyecare20_20_20
+package com.example.eyecare20_20_20.utils
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -7,7 +7,6 @@ import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import com.example.eyecare20_20_20.model.BottomNavItem
 import com.example.eyecare20_20_20.ui.navigation.Routes
-
 
 fun getNavigationItems(): List<BottomNavItem> {
     return listOf(
