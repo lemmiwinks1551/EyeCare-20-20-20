@@ -123,7 +123,7 @@ class TimerService : Service() {
     }
 
     private fun updateTimeUnits() {
-        duration.toComponents { hours, minutes, seconds, _ ->
+        duration.toComponents { minutes, seconds, _ ->
             this@TimerService.minutes.value = minutes.toString()
             this@TimerService.seconds.value = seconds.toString()
         }
@@ -141,17 +141,18 @@ class TimerService : Service() {
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                NOTIFICATION_CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_LOW
-            )
-            notificationManager.createNotificationChannel(channel)
-        }
+        /** Создает канал уведомлений c NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME */
+
+        val channel = NotificationChannel(
+            NOTIFICATION_CHANNEL_ID,
+            NOTIFICATION_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_LOW
+        )
+        notificationManager.createNotificationChannel(channel)
     }
 
     private fun updateNotification(minutes: String, seconds: String) {
+        /** Обновляет контент в уведомление по id */
         notificationManager.notify(
             NOTIFICATION_ID,
             notificationBuilder.setContentText(
@@ -167,7 +168,7 @@ class TimerService : Service() {
             0,
             NotificationCompat.Action(
                 0,
-                "Stop",
+                "Пауза",
                 ServiceHelper.stopPendingIntent(this)
             )
         )
@@ -192,7 +193,6 @@ class TimerService : Service() {
         fun getService(): TimerService = this@TimerService
     }
 }
-
 
 enum class TimerState {
     Idle,

@@ -24,14 +24,3 @@ fun getNavigationItems(): List<BottomNavItem> {
         ),
     )
 }
-
-fun convertMsToString(ms: Long): String {
-    val minutes = ms / 60000L
-    val seconds = ms % 60000L / 1000L
-    val secondsStr = if (seconds.toString().length == 1) {
-        "0${seconds}"
-    } else {
-        "$seconds"
-    }
-    return "$minutes:$secondsStr"
-}
