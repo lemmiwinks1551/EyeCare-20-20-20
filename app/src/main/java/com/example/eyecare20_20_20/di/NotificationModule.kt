@@ -12,6 +12,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
+import javax.inject.Inject
 
 @Module
 @InstallIn(ServiceComponent::class)
@@ -29,8 +30,16 @@ object NotificationModule {
             .setContentText("00:00")
             .setSmallIcon(R.drawable.baseline_access_time_24)
             .setOngoing(true) // Уведомление нельзя убрать свайпом
-            .addAction(0, "Стоп", ServiceHelper.stopPendingIntent(context)) // Кнопка для остановки таймера
-            .addAction(0, "Отмена", ServiceHelper.cancelPendingIntent(context)) // Кнопка для сброса таймера
+            .addAction(
+                0,
+                "Стоп",
+                ServiceHelper.stopPendingIntent(context)
+            ) // Кнопка для остановки таймера
+            .addAction(
+                0,
+                "Отмена",
+                ServiceHelper.cancelPendingIntent(context)
+            ) // Кнопка для сброса таймера
             .setContentIntent(ServiceHelper.clickPendingIntent(context)) // Открывает MainActivity при нажатии на уведомление
     }
 
@@ -46,4 +55,24 @@ object NotificationModule {
     ): NotificationManager {
         return context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
+}
+
+class NotificationActions @Inject constructor(@ApplicationContext private val context: Context) {
+    fun getPauseAction() = NotificationCompat.Action(
+        0,
+        "Пауза",
+        ServiceHelper.stopPendingIntent(context)
+    )
+
+    fun getResumeAction() = NotificationCompat.Action(
+        0,
+        "Продолжить",
+        ServiceHelper.resumePendingIntent(context)
+    )
+
+    fun getCancelAction() = NotificationCompat.Action(
+        0,
+        "Отмена",
+        ServiceHelper.stopPendingIntent(context)
+    )
 }

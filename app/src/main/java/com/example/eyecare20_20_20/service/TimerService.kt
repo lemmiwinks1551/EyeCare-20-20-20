@@ -9,6 +9,7 @@ import android.os.Binder
 import android.os.Build
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
+import com.example.eyecare20_20_20.di.NotificationActions
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
@@ -41,6 +42,9 @@ class TimerService : Service() {
 
     @Inject
     lateinit var notificationBuilder: NotificationCompat.Builder
+
+    @Inject
+    lateinit var notificationActions: NotificationActions
 
     private val binder = TimerBinder()
 
@@ -161,31 +165,19 @@ class TimerService : Service() {
         )
     }
 
-    @SuppressLint("RestrictedApi")
     private fun setStopButton() {
-        notificationBuilder.mActions.removeAt(0)
-        notificationBuilder.mActions.add(
-            0,
-            NotificationCompat.Action(
-                0,
-                "Пауза",
-                ServiceHelper.stopPendingIntent(this)
-            )
-        )
+        // Пересоздаем действия
+        notificationBuilder.clearActions()
+        notificationBuilder.addAction(notificationActions.getPauseAction())
+        notificationBuilder.addAction(notificationActions.getCancelAction())
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
-    @SuppressLint("RestrictedApi")
     private fun setResumeButton() {
-        notificationBuilder.mActions.removeAt(0)
-        notificationBuilder.mActions.add(
-            0,
-            NotificationCompat.Action(
-                0,
-                "Продолжить",
-                ServiceHelper.resumePendingIntent(this)
-            )
-        )
+        // Пересоздаем действия
+        notificationBuilder.clearActions()
+        notificationBuilder.addAction(notificationActions.getResumeAction())
+        notificationBuilder.addAction(notificationActions.getCancelAction())
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
