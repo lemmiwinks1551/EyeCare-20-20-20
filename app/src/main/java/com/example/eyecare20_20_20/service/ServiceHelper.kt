@@ -13,13 +13,17 @@ import com.example.eyecare20_20_20.utils.Constants.TIMER_STATE
 import com.example.eyecare20_20_20.utils.Constants.STOP_REQUEST_CODE
 
 object ServiceHelper {
+    /** Класс для управления таймером */
 
-    private val flag =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-            PendingIntent.FLAG_IMMUTABLE
-        else
-            0
+    // Объект PendingIntent оборачивает функциональность объекта Intent, позволяя вашему приложению указать,
+    // что другое приложение должно сделать от вашего имени  в ответ на будущее действие.
 
+    private const val flag = PendingIntent.FLAG_IMMUTABLE
+
+    /**
+     * Создает PendingIntent для открытия MainActivity при нажатии на уведомление.
+     * В Intent добавляется состояние таймера "Started".
+     */
     fun clickPendingIntent(context: Context): PendingIntent {
         val clickIntent = Intent(context, MainActivity::class.java).apply {
             putExtra(TIMER_STATE, TimerState.Started.name)
@@ -29,6 +33,9 @@ object ServiceHelper {
         )
     }
 
+    /**
+     * Создает PendingIntent для остановки таймера (передает в сервис состояние "Stopped").
+     */
     fun stopPendingIntent(context: Context): PendingIntent {
         val stopIntent = Intent(context, TimerService::class.java).apply {
             putExtra(TIMER_STATE, TimerState.Stopped.name)
@@ -38,6 +45,9 @@ object ServiceHelper {
         )
     }
 
+    /**
+     * Создает PendingIntent для возобновления таймера (передает в сервис состояние "Started").
+     */
     fun resumePendingIntent(context: Context): PendingIntent {
         val resumeIntent = Intent(context, TimerService::class.java).apply {
             putExtra(TIMER_STATE, TimerState.Started.name)
@@ -47,6 +57,9 @@ object ServiceHelper {
         )
     }
 
+    /**
+     * Создает PendingIntent для отмены таймера (передает в сервис состояние "Canceled").
+     */
     fun cancelPendingIntent(context: Context): PendingIntent {
         val cancelIntent = Intent(context, TimerService::class.java).apply {
             putExtra(TIMER_STATE, TimerState.Canceled.name)
@@ -56,6 +69,10 @@ object ServiceHelper {
         )
     }
 
+    /**
+     * Запускает ForegroundService с заданным action.
+     * Используется для управления состоянием таймера через сервис.
+     */
     fun triggerForegroundService(context: Context, action: String) {
         Intent(context, TimerService::class.java).apply {
             this.action = action

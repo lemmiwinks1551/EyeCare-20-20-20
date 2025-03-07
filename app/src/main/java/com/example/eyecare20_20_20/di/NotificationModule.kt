@@ -14,7 +14,6 @@ import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 
-@ExperimentalAnimationApi
 @Module
 @InstallIn(ServiceComponent::class)
 object NotificationModule {
@@ -26,7 +25,7 @@ object NotificationModule {
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setContentTitle("Таймер")
-            .setContentText("00:00:00")
+            .setContentText("00:00")
             .setSmallIcon(R.drawable.baseline_access_time_24)
             .setOngoing(true)
             .addAction(0, "Стоп", ServiceHelper.stopPendingIntent(context))

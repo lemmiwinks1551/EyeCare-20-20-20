@@ -7,12 +7,11 @@ import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.Build
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_STOP
+import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_ID
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_NAME
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_ID
@@ -59,19 +58,19 @@ class TimerService : Service() {
             TimerState.Started.name -> {
                 setStopButton()
                 startForegroundService()
-                startStopwatch { minutes, seconds ->
+                startTimer { minutes, seconds ->
                     updateNotification(minutes = minutes, seconds = seconds)
                 }
             }
 
             TimerState.Stopped.name -> {
-                stopStopwatch()
+                pauseTimer()
                 setResumeButton()
             }
 
             TimerState.Canceled.name -> {
-                stopStopwatch()
-                cancelStopwatch()
+                pauseTimer()
+                cancelTimer()
                 stopForegroundService()
             }
         }
@@ -81,19 +80,19 @@ class TimerService : Service() {
                 ACTION_SERVICE_START -> {
                     setStopButton()
                     startForegroundService()
-                    startStopwatch { minutes, seconds ->
+                    startTimer { minutes, seconds ->
                         updateNotification(minutes = minutes, seconds = seconds)
                     }
                 }
 
-                ACTION_SERVICE_STOP -> {
-                    stopStopwatch()
+                ACTION_SERVICE_PAUSE -> {
+                    pauseTimer()
                     setResumeButton()
                 }
 
                 ACTION_SERVICE_CANCEL -> {
-                    stopStopwatch()
-                    cancelStopwatch()
+                    pauseTimer()
+                    cancelTimer()
                     stopForegroundService()
                 }
             }
@@ -101,7 +100,7 @@ class TimerService : Service() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun startStopwatch(onTick: (m: String, s: String) -> Unit) {
+    private fun startTimer(onTick: (m: String, s: String) -> Unit) {
         currentState.value = TimerState.Started
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             duration = duration.plus(1.seconds)
@@ -110,14 +109,14 @@ class TimerService : Service() {
         }
     }
 
-    private fun stopStopwatch() {
+    private fun pauseTimer() {
         if (this::timer.isInitialized) {
             timer.cancel()
         }
         currentState.value = TimerState.Stopped
     }
 
-    private fun cancelStopwatch() {
+    private fun cancelTimer() {
         duration = Duration.ZERO
         currentState.value = TimerState.Idle
         updateTimeUnits()
@@ -156,13 +155,12 @@ class TimerService : Service() {
         notificationManager.notify(
             NOTIFICATION_ID,
             notificationBuilder.setContentText(
-                ""
+                "$minutes:$seconds"
             ).build()
         )
     }
 
     @SuppressLint("RestrictedApi")
-    @OptIn(ExperimentalAnimationApi::class)
     private fun setStopButton() {
         notificationBuilder.mActions.removeAt(0)
         notificationBuilder.mActions.add(

@@ -2,7 +2,6 @@ package com.example.eyecare20_20_20.ui.screens.home
 
 import android.content.Context
 import android.content.res.Configuration
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,8 +28,8 @@ import com.example.eyecare20_20_20.service.TimerState
 import com.example.eyecare20_20_20.ui.theme.Purple40
 import com.example.eyecare20_20_20.ui.theme.PurpleGrey40
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
+import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_STOP
 
 /* Layout-дерево
     HomeScreen
@@ -86,7 +85,7 @@ fun TimerScreen(context: Context, timerService: TimerService) {
 @Composable
 fun TimerDisplay(modifier: Modifier, timerService: TimerService) {
     Box(contentAlignment = Alignment.Center, modifier = modifier) {
-        TimerProgress(modifier = modifier)
+        TimerProgress(modifier = modifier, timerService = timerService)
         Text(
             text = "${timerService.minutes.value}:${timerService.seconds.value}",
             fontSize = 44.sp,
@@ -96,7 +95,7 @@ fun TimerDisplay(modifier: Modifier, timerService: TimerService) {
 }
 
 @Composable
-fun TimerProgress(modifier: Modifier) {
+fun TimerProgress(modifier: Modifier, timerService: TimerService) {
     Canvas(modifier = modifier) {
         val size = size.minDimension
         val strokeWidth = 10.dp.toPx()
@@ -126,15 +125,22 @@ fun TimerButtons(context: Context, timerService: TimerService) {
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         Button(
             onClick = {
+                /** В зависимости от состояния таймера отправляет соответствующее действие в ForegroundService. */
                 ServiceHelper.triggerForegroundService(
                     context = context,
-                    action = if (timerService.currentState.value == TimerState.Started) ACTION_SERVICE_STOP
-                    else ACTION_SERVICE_START
+                    action = if (timerService.currentState.value == TimerState.Started)
+                    /** Поставить наймер на паузу */
+                        ACTION_SERVICE_PAUSE
+                    else
+                    /** Запуск таймера */
+                        ACTION_SERVICE_START
                 )
             }
         ) {
             Text(
-                text = if (timerService.currentState.value == TimerState.Started) "Пауза"
+                /** В зависимости от состояния таймера отправляет устанавливает текст кнопки */
+                text =
+                if (timerService.currentState.value == TimerState.Started) "Пауза"
                 else if ((timerService.currentState.value == TimerState.Stopped)) "Продолжить"
                 else "Старт"
             )
