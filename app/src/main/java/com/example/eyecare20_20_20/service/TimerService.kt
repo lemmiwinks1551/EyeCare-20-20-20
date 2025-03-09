@@ -1,18 +1,18 @@
 package com.example.eyecare20_20_20.service
 
-import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
-import android.os.Build
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.di.NotificationActions
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
+import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
+import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MINUTES
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_ID
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_NAME
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_ID
@@ -22,6 +22,7 @@ import java.util.Timer
 import javax.inject.Inject
 import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 
 //  Unbound:
@@ -48,10 +49,10 @@ class TimerService : Service() {
 
     private val binder = TimerBinder()
 
-    private var duration: Duration = Duration.ZERO
+    private var duration: Duration = INITIAL_DURATION_MINUTES.minutes
     private lateinit var timer: Timer
 
-    var minutes = mutableStateOf("00")
+    var minutes = mutableStateOf(duration.inWholeMinutes.toString())
     var seconds = mutableStateOf("00")
     var currentState = mutableStateOf(TimerState.Idle)
 
@@ -107,7 +108,14 @@ class TimerService : Service() {
     private fun startTimer(onTick: (m: String, s: String) -> Unit) {
         currentState.value = TimerState.Started
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
-            duration = duration.plus(1.seconds)
+            duration = duration.minus(1.seconds)
+            if (duration.inWholeSeconds == 0L) {
+                // Если время вышло - останавливаем таймер
+                ServiceHelper.triggerForegroundService(
+                    context = this@TimerService.applicationContext,
+                    action = ACTION_SERVICE_CANCEL
+                )
+            }
             updateTimeUnits()
             onTick(minutes.value, seconds.value)
         }
@@ -121,7 +129,7 @@ class TimerService : Service() {
     }
 
     private fun cancelTimer() {
-        duration = Duration.ZERO
+        duration = INITIAL_DURATION_MINUTES.minutes
         currentState.value = TimerState.Idle
         updateTimeUnits()
     }
@@ -129,7 +137,7 @@ class TimerService : Service() {
     private fun updateTimeUnits() {
         duration.toComponents { minutes, seconds, _ ->
             this@TimerService.minutes.value = minutes.toString()
-            this@TimerService.seconds.value = seconds.toString()
+            this@TimerService.seconds.value = if (seconds < 10) "0$seconds" else seconds.toString()
         }
     }
 

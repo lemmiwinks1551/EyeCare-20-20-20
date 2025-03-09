@@ -77,6 +77,4 @@ object ServiceHelper {
             context.startService(this)
         }
     }
-
-
 }
