@@ -2,6 +2,9 @@ package com.example.eyecare20_20_20.di
 
 import android.app.NotificationManager
 import android.content.Context
+import android.content.res.Resources
+import android.graphics.BitmapFactory
+import android.graphics.drawable.Icon
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.R
 import com.example.eyecare20_20_20.service.ServiceHelper
@@ -26,8 +29,6 @@ object NotificationModule {
         @ApplicationContext context: Context
     ): NotificationCompat.Builder {
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-            .setContentTitle("Eye Care 20-20-20")
-            .setContentText("20:00")
             .setSmallIcon(R.drawable.baseline_access_time_24)
             .setOngoing(true) // Уведомление нельзя убрать свайпом
             .addAction(
@@ -58,6 +59,12 @@ object NotificationModule {
 }
 
 class NotificationActions @Inject constructor(@ApplicationContext private val context: Context) {
+    fun getStartAction() = NotificationCompat.Action(
+        0,
+        "Старт",
+        ServiceHelper.resumePendingIntent(context)
+    )
+
     fun getPauseAction() = NotificationCompat.Action(
         0,
         "Пауза",
