@@ -3,13 +3,10 @@ package com.example.eyecare20_20_20.service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Binder
-import android.os.Build
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.R
 import com.example.eyecare20_20_20.di.NotificationActions
@@ -114,7 +111,7 @@ class TimerService : Service() {
             duration = duration.minus(1.seconds)
             if (duration.inWholeSeconds == 0L) {
                 // Если время вышло - останавливаем таймер
-                playSoundAndVibrate()
+                playTimerEndSound()
                 ServiceHelper.triggerForegroundService(
                     context = this@TimerService.applicationContext,
                     action = ACTION_SERVICE_CANCEL
@@ -197,30 +194,10 @@ class TimerService : Service() {
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
-    private fun playSoundAndVibrate() {
+    private fun playTimerEndSound() {
         // Воспроизведение звука
         val mediaPlayer = MediaPlayer.create(this, R.raw.timer_end_sound)
         mediaPlayer.start()
-
-/*        // Вибрация
-        val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val vibratorManager = getSystemService("Context".VIBRATOR_MANAGER_SERVICE) as VibratorManager
-            vibratorManager.defaultVibrator
-        } else {
-            getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-        }
-
-        val effect = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE)
-        } else {
-            null
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(effect)
-        } else {
-            vibrator.vibrate(500) // 500 мс вибрации для старых устройств
-        }*/
     }
 
     inner class TimerBinder : Binder() {
