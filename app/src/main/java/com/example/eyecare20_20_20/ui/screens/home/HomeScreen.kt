@@ -1,7 +1,6 @@
 package com.example.eyecare20_20_20.ui.screens.home
 
 import android.content.Context
-import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,11 +18,10 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.eyecare20_20_20.model.HomeMviState
 import com.example.eyecare20_20_20.service.ServiceHelper
-import com.example.eyecare20_20_20.service.TimerService
 import com.example.eyecare20_20_20.service.TimerState
 import com.example.eyecare20_20_20.ui.theme.Purple40
 import com.example.eyecare20_20_20.ui.theme.PurpleGrey40
@@ -55,39 +53,35 @@ import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
     │           └── Button ("Сброс")
 */
 
-@Preview(showBackground = true)
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun HomeScreen(
-    timerService: TimerService = TimerService()
-) {
+fun HomeScreen(state: HomeMviState) {
     val context = LocalContext.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        TimerScreen(context, timerService)
+        TimerScreen(context, state)
     }
 }
 
 @Composable
-fun TimerScreen(context: Context, timerService: TimerService) {
+fun TimerScreen(context: Context, state: HomeMviState) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         TimerDisplay(
             modifier = Modifier.size(200.dp),
-            timerService = timerService
+            state = state
         )
-        TimerButtons(context, timerService)
+        TimerButtons(context, state)
     }
 }
 
 @Composable
-fun TimerDisplay(modifier: Modifier, timerService: TimerService) {
+fun TimerDisplay(modifier: Modifier, state: HomeMviState) {
     Box(contentAlignment = Alignment.Center, modifier = modifier) {
-        TimerProgress(modifier = modifier, timerService = timerService)
+        TimerProgress(modifier = modifier, state = state)
         Text(
-            text = "${timerService.minutes.value}:${timerService.seconds.value}",
+            text = "${state.timerService?.minutes?.value}:${state.timerService?.seconds?.value}",
             fontSize = 44.sp,
             fontWeight = FontWeight.Bold
         )
@@ -95,7 +89,7 @@ fun TimerDisplay(modifier: Modifier, timerService: TimerService) {
 }
 
 @Composable
-fun TimerProgress(modifier: Modifier, timerService: TimerService) {
+fun TimerProgress(modifier: Modifier, state: HomeMviState) {
     Canvas(modifier = modifier) {
         val size = size.minDimension
         val strokeWidth = 10.dp.toPx()
@@ -121,14 +115,14 @@ fun TimerProgress(modifier: Modifier, timerService: TimerService) {
 }
 
 @Composable
-fun TimerButtons(context: Context, timerService: TimerService) {
+fun TimerButtons(context: Context, state: HomeMviState) {
     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         Button(
             onClick = {
                 /** В зависимости от состояния таймера отправляет соответствующее действие в ForegroundService. */
                 ServiceHelper.triggerForegroundService(
                     context = context,
-                    action = if (timerService.currentState.value == TimerState.Started)
+                    action = if (state.timerService?.currentState?.value == TimerState.Started)
                     /** Поставить наймер на паузу */
                         ACTION_SERVICE_PAUSE
                     else
@@ -140,8 +134,8 @@ fun TimerButtons(context: Context, timerService: TimerService) {
             Text(
                 /** В зависимости от состояния таймера отправляет устанавливает текст кнопки */
                 text =
-                if (timerService.currentState.value == TimerState.Started) "Пауза"
-                else if ((timerService.currentState.value == TimerState.Stopped)) "Продолжить"
+                if (state.timerService?.currentState?.value == TimerState.Started) "Пауза"
+                else if ((state.timerService?.currentState?.value == TimerState.Stopped)) "Продолжить"
                 else "Старт"
             )
         }
