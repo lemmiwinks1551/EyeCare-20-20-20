@@ -25,7 +25,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -34,7 +33,7 @@ import com.example.eyecare20_20_20.model.HomeMviState
 import com.example.eyecare20_20_20.service.TimerService
 import com.example.eyecare20_20_20.ui.navigation.Routes
 import com.example.eyecare20_20_20.ui.screens.home.HomeScreen
-import com.example.eyecare20_20_20.ui.screens.home.TimerViewModel
+import com.example.eyecare20_20_20.ui.screens.home.HomeScreenViewModel
 import com.example.eyecare20_20_20.ui.screens.settings.SettingsScreen
 import com.example.eyecare20_20_20.ui.theme.EyeCare202020Theme
 import com.example.eyecare20_20_20.utils.getNavigationItems
@@ -42,7 +41,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: TimerViewModel by viewModels()
+    private val viewModel: HomeScreenViewModel by viewModels()
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
