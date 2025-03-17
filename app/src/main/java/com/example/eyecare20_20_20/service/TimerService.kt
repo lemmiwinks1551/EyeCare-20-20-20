@@ -6,6 +6,7 @@ import android.app.Service
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Binder
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.R
@@ -55,6 +56,7 @@ class TimerService : Service() {
     var minutes = mutableStateOf(duration.inWholeMinutes.toString())
     var seconds = mutableStateOf("00")
     var currentState = mutableStateOf(TimerState.Idle)
+    var progress: Float = 1f
 
     override fun onBind(p0: Intent?) = binder
 
@@ -109,6 +111,9 @@ class TimerService : Service() {
         currentState.value = TimerState.Started
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             duration = duration.minus(1.seconds)
+
+            calculateProgress()
+
             if (duration.inWholeSeconds == 0L) {
                 // Если время вышло - останавливаем таймер
                 playTimerEndSound()
@@ -202,6 +207,11 @@ class TimerService : Service() {
 
     inner class TimerBinder : Binder() {
         fun getService(): TimerService = this@TimerService
+    }
+
+    private fun calculateProgress() {
+        // Вычислить прогресс в % для отрисовки
+        progress = duration.inWholeSeconds.toFloat() / (INITIAL_DURATION_MINUTES.toFloat() * 60f)
     }
 }
 

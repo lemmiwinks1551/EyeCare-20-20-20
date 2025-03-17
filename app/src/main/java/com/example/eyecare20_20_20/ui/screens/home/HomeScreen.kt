@@ -28,6 +28,7 @@ import com.example.eyecare20_20_20.ui.theme.PurpleGrey40
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
+import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MINUTES
 
 /* Layout-дерево
     HomeScreen
@@ -102,15 +103,16 @@ fun TimerProgress(modifier: Modifier, state: HomeMviState) {
             size = Size(size, size),
             style = Stroke(strokeWidth, cap = StrokeCap.Round)
         )
-        drawArc(
-            color = Purple40,
-            startAngle = -215f,
-            sweepAngle = 250f,
-            // sweepAngle = 250f * state.progress,
-            useCenter = false,
-            size = Size(size, size),
-            style = Stroke(strokeWidth, cap = StrokeCap.Round)
-        )
+        if (state.timerService?.minutes?.value != null) {
+            drawArc(
+                color = Purple40,
+                startAngle = -215f,
+                sweepAngle = 250f * (state.timerService.progress),
+                useCenter = false,
+                size = Size(size, size),
+                style = Stroke(strokeWidth, cap = StrokeCap.Round)
+            )
+        }
     }
 }
 
