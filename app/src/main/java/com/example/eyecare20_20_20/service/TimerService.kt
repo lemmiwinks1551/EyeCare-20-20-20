@@ -6,7 +6,6 @@ import android.app.Service
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Binder
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.R
@@ -101,6 +100,7 @@ class TimerService : Service() {
                     pauseTimer()
                     cancelTimer()
                     stopForegroundService()
+                    progress = 1f
                 }
             }
         }
@@ -178,8 +178,10 @@ class TimerService : Service() {
         notificationManager.notify(
             NOTIFICATION_ID,
             notificationBuilder.setContentText(
-                "$minutes:$seconds"
-            ).build()
+                "$minutes:$seconds",
+            )
+                .setProgress(100, (progress * 100).toInt(), false)
+                .build()
         )
     }
 
@@ -203,6 +205,9 @@ class TimerService : Service() {
         // Воспроизведение звука
         val mediaPlayer = MediaPlayer.create(this, R.raw.timer_end_sound)
         mediaPlayer.start()
+        mediaPlayer.setOnCompletionListener {
+            it.release()
+        }
     }
 
     inner class TimerBinder : Binder() {

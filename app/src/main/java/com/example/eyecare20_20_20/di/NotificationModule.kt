@@ -42,6 +42,7 @@ object NotificationModule {
                 ServiceHelper.cancelPendingIntent(context)
             ) // Кнопка для сброса таймера
             .setContentIntent(ServiceHelper.clickPendingIntent(context)) // Открывает MainActivity при нажатии на уведомление
+            .setProgress(100, 0, false)
     }
 
     /** Предоставляет экземпляр NotificationManager для управления уведомлениями
