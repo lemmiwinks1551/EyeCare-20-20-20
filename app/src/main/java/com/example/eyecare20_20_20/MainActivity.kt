@@ -41,16 +41,16 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val viewModel: HomeScreenViewModel by viewModels()
+    private val homeScreenViewModel: HomeScreenViewModel by viewModels()
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as TimerService.TimerBinder
-            viewModel.onServiceConnected(binder.getService()) // передаем сервис во ViewModel
+            homeScreenViewModel.onServiceConnected(binder.getService()) // передаем сервис во ViewModel
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
-            viewModel.onServiceDisconnected()
+            homeScreenViewModel.onServiceDisconnected()
         }
     }
 
@@ -65,11 +65,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val state by viewModel.state.collectAsState()
+            val homeMviState by homeScreenViewModel.state.collectAsState()
 
             EyeCare202020Theme {
-                if (state.isServiceBound) {
-                    bottomNavigation(state)
+                if (homeMviState.isServiceBound) {
+                    bottomNavigation(homeMviState)
                 }
             }
         }
@@ -82,7 +82,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun bottomNavigation(state: HomeMviState) {
+fun bottomNavigation(homeMviState: HomeMviState) {
     val navController = rememberNavController()
     val navItems = getNavigationItems()
     var selectedItemIndex by rememberSaveable { mutableStateOf(0) }
@@ -130,7 +130,7 @@ fun bottomNavigation(state: HomeMviState) {
                 navController = navController,
                 startDestination = Routes.Home
             ) {
-                composable(Routes.Home) { HomeScreen(state = state) }
+                composable(Routes.Home) { HomeScreen(state = homeMviState) }
                 composable(Routes.Settings) { SettingsScreen() }
             }
         }

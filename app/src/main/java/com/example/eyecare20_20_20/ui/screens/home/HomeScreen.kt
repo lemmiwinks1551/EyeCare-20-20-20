@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eyecare20_20_20.model.HomeMviState
@@ -55,7 +56,8 @@ import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MINUTES
 */
 
 @Composable
-fun HomeScreen(state: HomeMviState) {
+@Preview
+fun HomeScreen(state: HomeMviState = HomeMviState()) {
     val context = LocalContext.current
 
     Box(
