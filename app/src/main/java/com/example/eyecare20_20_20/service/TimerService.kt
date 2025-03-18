@@ -4,15 +4,15 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
-import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.os.Binder
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
-import com.example.eyecare20_20_20.R
 import com.example.eyecare20_20_20.di.NotificationActions
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
+import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_TIMEOUT
 import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MINUTES
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_ID
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_NAME
@@ -25,17 +25,6 @@ import kotlin.concurrent.fixedRateTimer
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-
-//  Unbound:
-//  Foreground - видим для пользователя, показывая уведомление в статус баре,
-//  когда активен, используется для музыки
-//  Background - не виден пользователю, обращения к бекенду, работа с файлами приложения
-//  После Oreo (8.0) - не работает, когда приложение не на переднем плане, только Foreground может
-
-//  Bound:
-//  предоставляет компоненту (Activity) возможность привязаться к сервису используя IPC, iBinder
-//  прекращает работу, когда нет активных bind() подключений
-//  (то есть, если приложение закроется, сервис тоже завершится)
 
 @AndroidEntryPoint
 class TimerService : Service() {
@@ -102,12 +91,22 @@ class TimerService : Service() {
                     stopForegroundService()
                     progress = 1f
                 }
+
+                ACTION_SERVICE_TIMEOUT -> {
+                    playTimerEndSound()
+                    pauseTimer()
+                    timeoutTimer()
+                    setStartButton()
+                }
             }
         }
         return super.onStartCommand(intent, flags, startId)
     }
 
     private fun startTimer(onTick: (m: String, s: String) -> Unit) {
+        if (this::timer.isInitialized) {
+            timer.cancel()
+        }
         currentState.value = TimerState.Started
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             duration = duration.minus(1.seconds)
@@ -115,16 +114,10 @@ class TimerService : Service() {
             calculateProgress()
 
             if (duration.inWholeSeconds == 0L) {
-                // Если время вышло - останавливаем таймер
-                playTimerEndSound()
                 ServiceHelper.triggerForegroundService(
                     context = this@TimerService.applicationContext,
-                    action = ACTION_SERVICE_CANCEL
+                    action = ACTION_SERVICE_TIMEOUT
                 )
-                notificationBuilder.clearActions()
-                notificationBuilder.addAction(notificationActions.getStartAction())
-                notificationBuilder.addAction(notificationActions.getCancelAction())
-                notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
             }
             updateTimeUnits()
             onTick(minutes.value, seconds.value)
@@ -144,6 +137,11 @@ class TimerService : Service() {
         updateTimeUnits()
     }
 
+    private fun timeoutTimer() {
+        duration = INITIAL_DURATION_MINUTES.minutes
+        currentState.value = TimerState.Timeout
+    }
+
     private fun updateTimeUnits() {
         duration.toComponents { minutes, seconds, _ ->
             this@TimerService.minutes.value = minutes.toString()
@@ -157,6 +155,7 @@ class TimerService : Service() {
     }
 
     private fun stopForegroundService() {
+        pauseTimer()
         notificationManager.cancel(NOTIFICATION_ID)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -193,6 +192,14 @@ class TimerService : Service() {
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
     }
 
+    private fun setStartButton() {
+        // Пересоздаем действия
+        notificationBuilder.clearActions()
+        notificationBuilder.addAction(notificationActions.getStartAction())
+        notificationBuilder.addAction(notificationActions.getCancelAction())
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
     private fun setResumeButton() {
         // Пересоздаем действия
         notificationBuilder.clearActions()
@@ -203,10 +210,12 @@ class TimerService : Service() {
 
     private fun playTimerEndSound() {
         // Воспроизведение звука
-        val mediaPlayer = MediaPlayer.create(this, R.raw.timer_end_sound)
-        mediaPlayer.start()
-        mediaPlayer.setOnCompletionListener {
-            it.release()
+        try {
+            val notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            val r = RingtoneManager.getRingtone(applicationContext, notification)
+            r.play()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -224,5 +233,6 @@ enum class TimerState {
     Idle,
     Started,
     Stopped,
+    Timeout,
     Canceled
 }

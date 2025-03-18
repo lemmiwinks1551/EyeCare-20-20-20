@@ -140,6 +140,7 @@ fun TimerButtons(context: Context, state: HomeMviState) {
                 text =
                 if (state.timerService?.currentState?.value == TimerState.Started) "Пауза"
                 else if ((state.timerService?.currentState?.value == TimerState.Stopped)) "Продолжить"
+                else if ((state.timerService?.currentState?.value == TimerState.Timeout)) "Старт"
                 else "Старт"
             )
         }
