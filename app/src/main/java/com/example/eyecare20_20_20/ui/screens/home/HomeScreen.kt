@@ -6,7 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -18,18 +22,19 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.eyecare20_20_20.model.HomeMviState
 import com.example.eyecare20_20_20.service.ServiceHelper
+import com.example.eyecare20_20_20.service.TimerService
 import com.example.eyecare20_20_20.service.TimerState
 import com.example.eyecare20_20_20.ui.theme.Purple40
 import com.example.eyecare20_20_20.ui.theme.PurpleGrey40
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
-import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MINUTES
 
 /* Layout-дерево
     HomeScreen
@@ -56,15 +61,33 @@ import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MINUTES
 */
 
 @Composable
-@Preview
-fun HomeScreen(state: HomeMviState = HomeMviState()) {
+@Preview(showBackground = true)
+fun HomeScreen(
+    state: HomeMviState = HomeMviState(
+        isServiceBound = false,
+        timerService = TimerService()
+    )
+) {
     val context = LocalContext.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        TimerScreen(context, state)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                TimerScreen(context, state)
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            AppDescription()
+        }
     }
 }
 
@@ -154,4 +177,13 @@ fun TimerButtons(context: Context, state: HomeMviState) {
             Text("Сброс")
         }
     }
+}
+
+@Composable
+fun AppDescription() {
+    Text(modifier = Modifier.padding(12.dp),
+        textAlign = TextAlign.Center,
+        fontSize = 16.sp,
+        text = "Правило 20-20-20 помогает снизить напряжение глаз при работе за компьютером. " +
+            "Каждые 20 минут делайте 20-секундный перерыв и смотрите на объект на расстоянии 6 метров.")
 }
