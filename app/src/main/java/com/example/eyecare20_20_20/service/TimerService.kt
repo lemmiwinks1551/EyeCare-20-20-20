@@ -49,6 +49,7 @@ class TimerService : Service() {
     override fun onBind(p0: Intent?) = binder
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        // Вызов из Notification
         when (intent?.getStringExtra(TIMER_STATE)) {
             TimerState.Started.name -> {
                 setStopButton()
@@ -58,19 +59,20 @@ class TimerService : Service() {
                 }
             }
 
-            TimerState.Stopped.name -> {
+            TimerState.Paused.name -> {
                 pauseTimer()
                 setResumeButton()
             }
 
             TimerState.Canceled.name -> {
-                pauseTimer()
                 cancelTimer()
                 stopForegroundService()
+                progress = 1f
             }
         }
 
         intent?.action.let {
+            // Вызов из UI
             when (it) {
                 ACTION_SERVICE_START -> {
                     setStopButton()
@@ -86,7 +88,6 @@ class TimerService : Service() {
                 }
 
                 ACTION_SERVICE_CANCEL -> {
-                    pauseTimer()
                     cancelTimer()
                     stopForegroundService()
                     progress = 1f
@@ -128,10 +129,13 @@ class TimerService : Service() {
         if (this::timer.isInitialized) {
             timer.cancel()
         }
-        currentState.value = TimerState.Stopped
+        currentState.value = TimerState.Paused
     }
 
     private fun cancelTimer() {
+        if (this::timer.isInitialized) {
+            timer.cancel()
+        }
         duration = INITIAL_DURATION_MINUTES.minutes
         currentState.value = TimerState.Idle
         updateTimeUnits()
@@ -155,7 +159,7 @@ class TimerService : Service() {
     }
 
     private fun stopForegroundService() {
-        pauseTimer()
+        cancelTimer()
         notificationManager.cancel(NOTIFICATION_ID)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -232,7 +236,7 @@ class TimerService : Service() {
 enum class TimerState {
     Idle,
     Started,
-    Stopped,
+    Paused,
     Timeout,
     Canceled
 }
