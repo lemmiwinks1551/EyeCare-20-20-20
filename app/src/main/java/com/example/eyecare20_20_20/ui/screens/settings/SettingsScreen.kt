@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,23 +31,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Preview(showBackground = true)
 fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsState()
-
     val context = LocalContext.current
-    var hasNotificationPermission by remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            mutableStateOf(
-                ContextCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.POST_NOTIFICATIONS
-                ) == PackageManager.PERMISSION_GRANTED
-            )
-        } else mutableStateOf(true)
+
+    // Проверка разрешения при старте экрана
+    LaunchedEffect(Unit) {
+        viewModel.checkNotificationPermission(context)
     }
 
+    // Лаунчер для запроса разрешения
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
-            hasNotificationPermission = isGranted
+            viewModel.updateNotificationPermission(isGranted)
         }
     )
 
@@ -66,9 +62,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
                         launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
                     }
                 }) {
-                Text(text = if (hasNotificationPermission)
-                    "Уведомелния включены"
-                else "Включить уведомления")
+                Text(
+                    text = if (state.notificationsEnabled)
+                        "Уведомления включены"
+                    else "Включить уведомления"
+                )
             }
         }
     }
