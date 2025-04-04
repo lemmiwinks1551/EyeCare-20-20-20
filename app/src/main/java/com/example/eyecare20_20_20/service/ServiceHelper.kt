@@ -31,7 +31,7 @@ object ServiceHelper {
         )
     }
 
-    /** Создает PendingIntent для остановки таймера (передает в сервис состояние "Stopped"). */
+    /** Создает PendingIntent для остановки таймера (передает в сервис состояние "Paused"). */
     fun stopPendingIntent(context: Context): PendingIntent {
         val stopIntent = Intent(context, TimerService::class.java).apply {
             putExtra(TIMER_STATE, TimerState.Paused.name)
