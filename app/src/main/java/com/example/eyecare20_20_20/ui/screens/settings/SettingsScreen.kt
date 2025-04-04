@@ -57,6 +57,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel()) {
         ) {
             Button(
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !state.notificationsEnabled,
                 onClick = {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
