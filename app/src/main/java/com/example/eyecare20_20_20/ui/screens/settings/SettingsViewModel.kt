@@ -16,16 +16,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor() : ViewModel() {
+
     // Состояние UI
     private val _state = MutableStateFlow(SettingsMviState())
     val state: StateFlow<SettingsMviState> = _state.asStateFlow()
 
-    // Вызывается из UI, чтобы обновить разрешение
-    fun updateNotificationPermission(isGranted: Boolean) {
-        _state.update { it.copy(notificationsEnabled = isGranted) }
-    }
-
-    // Вызывается из UI при старте, чтобы проверить, есть ли уже разрешение
+    // Проверка текущего разрешения
     fun checkNotificationPermission(context: Context) {
         val granted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
@@ -34,6 +30,6 @@ class SettingsViewModel @Inject constructor() : ViewModel() {
             ) == PackageManager.PERMISSION_GRANTED
         } else true
 
-        updateNotificationPermission(granted)
+        _state.update { it.copy(notificationsEnabled = granted) }
     }
 }
