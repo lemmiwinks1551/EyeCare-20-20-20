@@ -108,11 +108,15 @@ class TimerService : Service() {
         if (this::timer.isInitialized) {
             timer.cancel()
         }
+
         currentState.value = TimerState.Started
+
         timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
             duration = duration.minus(1.seconds)
 
+            updateTimeUnits()
             calculateProgress()
+            onTick(minutes.value, seconds.value)
 
             if (duration.inWholeSeconds == 0L) {
                 ServiceHelper.triggerForegroundService(
@@ -120,8 +124,6 @@ class TimerService : Service() {
                     action = ACTION_SERVICE_TIMEOUT
                 )
             }
-            updateTimeUnits()
-            onTick(minutes.value, seconds.value)
         }
     }
 
