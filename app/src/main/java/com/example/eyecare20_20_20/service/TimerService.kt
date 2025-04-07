@@ -106,6 +106,7 @@ class TimerService : Service() {
 
     private fun startTimer(onTick: (m: String, s: String) -> Unit) {
         if (this::timer.isInitialized) {
+            // Чтобы не было двух таймеров параллельно - отменяем другой
             timer.cancel()
         }
 
@@ -119,6 +120,7 @@ class TimerService : Service() {
             onTick(minutes.value, seconds.value)
 
             if (duration.inWholeSeconds == 0L) {
+                this.cancel()
                 ServiceHelper.triggerForegroundService(
                     context = this@TimerService.applicationContext,
                     action = ACTION_SERVICE_TIMEOUT

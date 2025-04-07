@@ -1,7 +1,7 @@
 package com.example.eyecare20_20_20.utils
 
 object Constants {
-    const val INITIAL_DURATION_MINUTES = 1L
+    const val INITIAL_DURATION_MINUTES = 20L
     const val ACTION_SERVICE_START = "ACTION_SERVICE_START"
     const val ACTION_SERVICE_PAUSE = "ACTION_SERVICE_PAUSE"
     const val ACTION_SERVICE_CANCEL = "ACTION_SERVICE_CANCEL"
