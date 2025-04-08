@@ -6,9 +6,9 @@ import android.content.Intent
 import com.example.eyecare20_20_20.MainActivity
 import com.example.eyecare20_20_20.utils.Constants.CANCEL_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.CLICK_REQUEST_CODE
+import com.example.eyecare20_20_20.utils.Constants.PAUSE_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.RESUME_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.TIMER_STATE
-import com.example.eyecare20_20_20.utils.Constants.PAUSE_REQUEST_CODE
 
 object ServiceHelper {
     /** Класс для управления таймером */
@@ -31,7 +31,8 @@ object ServiceHelper {
         )
     }
 
-    /** Создает PendingIntent для остановки таймера (передает в сервис состояние "Paused"). */
+    /** Создает PendingIntent для остановки таймера (передает в сервис состояние "Paused").
+     * */
     fun stopPendingIntent(context: Context): PendingIntent {
         val stopIntent = Intent(context, TimerService::class.java).apply {
             putExtra(TIMER_STATE, TimerState.Paused.name)
