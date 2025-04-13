@@ -11,9 +11,6 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.di.NotificationActions
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_RESET
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
 import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MS
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_ID
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_NAME
@@ -157,19 +154,13 @@ class TimerService : Service() {
         startForeground(NOTIFICATION_ID, notificationBuilder.build())
     }
 
-    private fun stopForegroundService() {
-        notificationManager.cancel(NOTIFICATION_ID)
-        stopForeground(STOP_FOREGROUND_REMOVE)
-        stopSelf()
-    }
-
     private fun createNotificationChannel() {
         /** Создает канал уведомлений c NOTIFICATION_CHANNEL_ID, NOTIFICATION_CHANNEL_NAME */
 
         val channel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
             NOTIFICATION_CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         )
         notificationManager.createNotificationChannel(channel)
     }

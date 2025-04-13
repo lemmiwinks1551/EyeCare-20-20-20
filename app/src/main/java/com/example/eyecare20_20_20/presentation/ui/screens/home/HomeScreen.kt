@@ -32,7 +32,6 @@ import com.example.eyecare20_20_20.service.TimerService
 import com.example.eyecare20_20_20.service.TimerState
 import com.example.eyecare20_20_20.presentation.ui.theme.Purple40
 import com.example.eyecare20_20_20.presentation.ui.theme.PurpleGrey40
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_RESET
 
 /* Layout-дерево
     HomeScreen

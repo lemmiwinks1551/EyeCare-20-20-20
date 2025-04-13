@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.example.eyecare20_20_20.MainActivity
-import com.example.eyecare20_20_20.utils.Constants.CANCEL_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.CLICK_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.PAUSE_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.RESER_REQUEST_CODE

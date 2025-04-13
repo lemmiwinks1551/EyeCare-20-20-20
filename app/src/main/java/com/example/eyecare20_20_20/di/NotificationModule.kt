@@ -19,7 +19,6 @@ import javax.inject.Inject
 object NotificationModule {
 
     /** Предоставляет экземпляр NotificationCompat.Builder для создания уведомлений */
-
     @ServiceScoped
     @Provides
     fun provideNotificationBuilder(
@@ -46,7 +45,6 @@ object NotificationModule {
      * NotificationManager — это системный сервис Android, который управляет уведомлениями.
      * Он позволяет создавать, обновлять и удалять уведомления в статус-баре.
      * */
-
     @ServiceScoped
     @Provides
     fun provideNotificationManager(
