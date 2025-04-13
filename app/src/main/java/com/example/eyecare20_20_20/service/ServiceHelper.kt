@@ -7,6 +7,7 @@ import com.example.eyecare20_20_20.MainActivity
 import com.example.eyecare20_20_20.utils.Constants.CANCEL_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.CLICK_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.PAUSE_REQUEST_CODE
+import com.example.eyecare20_20_20.utils.Constants.RESER_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.RESUME_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.TIMER_STATE
 
@@ -33,7 +34,7 @@ object ServiceHelper {
 
     /** Создает PendingIntent для остановки таймера (передает в сервис состояние "Paused").
      * */
-    fun stopPendingIntent(context: Context): PendingIntent {
+    fun pausePendingIntent(context: Context): PendingIntent {
         val stopIntent = Intent(context, TimerService::class.java).apply {
             putExtra(TIMER_STATE, TimerState.Paused.name)
         }
@@ -54,15 +55,12 @@ object ServiceHelper {
         )
     }
 
-    /**
-     * Создает PendingIntent для отмены таймера (передает в сервис состояние "Canceled").
-     */
-    fun cancelPendingIntent(context: Context): PendingIntent {
+    fun resetPendingIntent(context: Context): PendingIntent {
         val cancelIntent = Intent(context, TimerService::class.java).apply {
-            putExtra(TIMER_STATE, TimerState.Canceled.name)
+            putExtra(TIMER_STATE, TimerState.Reset.name)
         }
         return PendingIntent.getService(
-            context, CANCEL_REQUEST_CODE, cancelIntent, flag
+            context, RESER_REQUEST_CODE, cancelIntent, flag
         )
     }
 

@@ -11,8 +11,8 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.di.NotificationActions
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
+import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_RESET
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
 import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MS
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_ID
@@ -20,8 +20,13 @@ import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_NAME
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_ID
 import com.example.eyecare20_20_20.utils.Constants.TIMER_STATE
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.floor
 
 @AndroidEntryPoint
 class TimerService : Service() {
@@ -35,7 +40,8 @@ class TimerService : Service() {
     lateinit var notificationActions: NotificationActions
 
     private val binder = TimerBinder()
-    private var duration = INITIAL_DURATION_MS
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val duration = MutableStateFlow(INITIAL_DURATION_MS)
     private lateinit var countDownTimer: CountDownTimer
 
     var minutes = mutableStateOf("20")
@@ -44,48 +50,42 @@ class TimerService : Service() {
     var currentState = mutableStateOf(TimerState.Idle)
     var progress: Float = 1f
 
+    inner class TimerBinder : Binder() {
+        fun getService(): TimerService = this@TimerService
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+
+        serviceScope.launch {
+            duration.collect {
+                // Пересчитываем минуты и секунды
+                updateTimeUnits()
+
+                // Вычисляем прогресс
+                calculateProgress()
+
+                // Обновляем UI в нотификации
+                updateNotification()
+            }
+        }
+    }
+
     override fun onBind(p0: Intent?) = binder
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // Вызов из Notification
+        // Вызов из Notification или UI
         when (intent?.getStringExtra(TIMER_STATE)) {
             TimerState.Started.name -> {
-                setStopButton()
-                startForegroundService()
-                startTimer()
+                startButtonCLick()
             }
 
             TimerState.Paused.name -> {
-                pauseTimer()
-                setResumeButton()
+                pauseButtonClick()
             }
 
-            TimerState.Canceled.name -> {
-                cancelTimer()
-                stopForegroundService()
-                progress = 1f
-            }
-        }
-
-        intent?.action.let {
-            // Вызов из UI
-            when (it) {
-                ACTION_SERVICE_START -> {
-                    setStopButton()
-                    startForegroundService()
-                    startTimer()
-                }
-
-                ACTION_SERVICE_PAUSE -> {
-                    pauseTimer()
-                    setResumeButton()
-                }
-
-                ACTION_SERVICE_CANCEL -> {
-                    cancelTimer()
-                    stopForegroundService()
-                    progress = 1f
-                }
+            TimerState.Reset.name -> {
+                resetButtonClick()
             }
         }
 
@@ -98,28 +98,23 @@ class TimerService : Service() {
             countDownTimer.cancel()
         }
 
+        if (currentState.value == TimerState.Timeout) {
+            duration.value = INITIAL_DURATION_MS
+        }
+
         currentState.value = TimerState.Started
 
         countDownTimer = object : CountDownTimer(
-            INITIAL_DURATION_MS,
+            duration.value,
             1000L
         ) {
             override fun onTick(p0: Long) {
                 // Пересчитываем время (защита от отрицательного значения)
-                duration = maxOf(0, p0)
-
-                // Вычисляем прогресс
-                calculateProgress()
-
-                // Обновляем минуты, секунды и прогресс в нотификации
-                updateTimeUnits()
-
-                // Обновляем UI в нотификации
-                updateNotification()
+                duration.value = maxOf(0, p0)
             }
 
             override fun onFinish() {
-                Log.i("countDownTimer", "$duration")
+                Log.i("countDownTimer", "${duration.value}")
                 onTimerEnd()
             }
         }
@@ -128,11 +123,10 @@ class TimerService : Service() {
     }
 
     private fun onTimerEnd() {
-        progress = 0f
+        duration.value = 0
 
         playTimerEndSound()
         timeoutTimer()
-        updateNotification()
         setStartButton()
     }
 
@@ -143,29 +137,19 @@ class TimerService : Service() {
         currentState.value = TimerState.Paused
     }
 
-    private fun cancelTimer() {
-        if (this::countDownTimer.isInitialized) {
-            countDownTimer.cancel()
-        }
-        duration = INITIAL_DURATION_MS
-        currentState.value = TimerState.Idle
-        updateTimeUnits()
-    }
-
     private fun timeoutTimer() {
         countDownTimer.cancel()
-        duration = INITIAL_DURATION_MS
         currentState.value = TimerState.Timeout
     }
 
     private fun updateTimeUnits() {
         // Обновляем минуты и секунды в удобный формат
-        val totalSeconds = duration / 1000
+        val totalSeconds = duration.value / 1000
         val m = totalSeconds / 60
         val s = totalSeconds % 60
 
-        minutes.value = if(m < 10) "0$m" else m.toString()
-        seconds.value = if(s < 10) "0$s" else s.toString()
+        minutes.value = if (m < 10) "0$m" else m.toString()
+        seconds.value = if (s < 10) "0$s" else s.toString()
     }
 
     private fun startForegroundService() {
@@ -174,7 +158,6 @@ class TimerService : Service() {
     }
 
     private fun stopForegroundService() {
-        cancelTimer()
         notificationManager.cancel(NOTIFICATION_ID)
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
@@ -204,30 +187,6 @@ class TimerService : Service() {
         )
     }
 
-    private fun setStopButton() {
-        // Пересоздаем действия
-        notificationBuilder.clearActions()
-        notificationBuilder.addAction(notificationActions.getPauseAction())
-        notificationBuilder.addAction(notificationActions.getCancelAction())
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
-    }
-
-    private fun setStartButton() {
-        // Пересоздаем действия
-        notificationBuilder.clearActions()
-        notificationBuilder.addAction(notificationActions.getStartAction())
-        notificationBuilder.addAction(notificationActions.getCancelAction())
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
-    }
-
-    private fun setResumeButton() {
-        // Пересоздаем действия
-        notificationBuilder.clearActions()
-        notificationBuilder.addAction(notificationActions.getResumeAction())
-        notificationBuilder.addAction(notificationActions.getCancelAction())
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
-    }
-
     private fun playTimerEndSound() {
         // Воспроизведение звука
         try {
@@ -239,13 +198,60 @@ class TimerService : Service() {
         }
     }
 
-    inner class TimerBinder : Binder() {
-        fun getService(): TimerService = this@TimerService
-    }
-
     private fun calculateProgress() {
         // Вычислить прогресс в % для отрисовки
-        progress = duration.toFloat() / INITIAL_DURATION_MS.toFloat()
+        progress = duration.value.toFloat() / INITIAL_DURATION_MS.toFloat()
+    }
+
+    // Set buttons in notification
+    private fun setStopButton() {
+        // Пересоздаем действия
+        notificationBuilder.clearActions()
+        notificationBuilder.addAction(notificationActions.getPauseAction())
+        notificationBuilder.addAction(notificationActions.getResetAction())
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    private fun setStartButton() {
+        // Пересоздаем действия
+        notificationBuilder.clearActions()
+        notificationBuilder.addAction(notificationActions.getStartAction())
+        notificationBuilder.addAction(notificationActions.getResetAction())
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    private fun setResumeButton() {
+        // Пересоздаем действия
+        notificationBuilder.clearActions()
+        notificationBuilder.addAction(notificationActions.getResumeAction())
+        notificationBuilder.addAction(notificationActions.getResetAction())
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    // Buttons clicks
+    private fun startButtonCLick() {
+        setStopButton()
+        startForegroundService()
+        startTimer()
+        currentState.value = TimerState.Started
+    }
+
+    private fun pauseButtonClick() {
+        pauseTimer()
+        setResumeButton()
+        currentState.value = TimerState.Paused
+    }
+
+    private fun resetButtonClick() {
+        pauseTimer()
+        setStartButton()
+        duration.value = INITIAL_DURATION_MS
+        currentState.value = TimerState.Reset
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        serviceScope.cancel()
     }
 }
 
@@ -253,6 +259,6 @@ enum class TimerState {
     Idle,
     Started,
     Paused,
-    Timeout,
-    Canceled
+    Reset,
+    Timeout
 }

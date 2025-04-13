@@ -46,7 +46,8 @@ class MainActivity : ComponentActivity() {
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val binder = service as TimerService.TimerBinder
-            homeScreenViewModel.onServiceConnected(binder.getService()) // передаем сервис во ViewModel
+            // Передаем сервис во ViewModel
+            homeScreenViewModel.onServiceConnected(binder.getService())
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {

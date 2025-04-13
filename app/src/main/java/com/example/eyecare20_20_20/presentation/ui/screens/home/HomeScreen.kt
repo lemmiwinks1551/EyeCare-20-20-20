@@ -32,9 +32,7 @@ import com.example.eyecare20_20_20.service.TimerService
 import com.example.eyecare20_20_20.service.TimerState
 import com.example.eyecare20_20_20.presentation.ui.theme.Purple40
 import com.example.eyecare20_20_20.presentation.ui.theme.PurpleGrey40
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
+import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_RESET
 
 /* Layout-дерево
     HomeScreen
@@ -147,31 +145,38 @@ fun TimerButtons(context: Context, state: HomeMviState) {
         Button(
             onClick = {
                 /** В зависимости от состояния таймера отправляет соответствующее действие в ForegroundService. */
-                ServiceHelper.triggerForegroundService(
-                    context = context,
-                    action = if (state.timerService?.currentState?.value == TimerState.Started)
-                    /** Поставить наймер на паузу */
-                        ACTION_SERVICE_PAUSE
-                    else
-                    /** Запуск таймера */
-                        ACTION_SERVICE_START
-                )
+                when (state.timerService?.currentState?.value) {
+                    TimerState.Started -> {
+                        ServiceHelper.pausePendingIntent(context).send()
+                    }
+
+                    TimerState.Paused -> {
+                        ServiceHelper.resumePendingIntent(context).send()
+                    }
+
+                    else -> {
+                        ServiceHelper.resumePendingIntent(context).send()
+                    }
+                }
             }
         ) {
             Text(
                 /** В зависимости от состояния таймера отправляет устанавливает текст кнопки */
                 text =
-                if (state.timerService?.currentState?.value == TimerState.Started) "Пауза"
-                else if ((state.timerService?.currentState?.value == TimerState.Paused)) "Продолжить"
-                else if ((state.timerService?.currentState?.value == TimerState.Timeout)) "Старт"
-                else "Старт"
+                when(state.timerService?.currentState?.value) {
+                    TimerState.Started -> {
+                        "Пауза"
+                    }
+                    TimerState.Paused -> {
+                        "Продолжить"
+                    }
+                    else -> {"Старт"}
+                }
             )
         }
         Button(
             onClick = {
-                ServiceHelper.triggerForegroundService(
-                    context = context, action = ACTION_SERVICE_CANCEL
-                )
+                ServiceHelper.resetPendingIntent(context).send()
             }
         ) {
             Text("Сброс")

@@ -2,9 +2,6 @@ package com.example.eyecare20_20_20.di
 
 import android.app.NotificationManager
 import android.content.Context
-import android.content.res.Resources
-import android.graphics.BitmapFactory
-import android.graphics.drawable.Icon
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.R
 import com.example.eyecare20_20_20.service.ServiceHelper
@@ -33,13 +30,13 @@ object NotificationModule {
             .setOngoing(true) // Уведомление нельзя убрать свайпом
             .addAction(
                 0,
-                "Стоп",
-                ServiceHelper.stopPendingIntent(context)
+                "Старт",
+                ServiceHelper.resumePendingIntent(context)
             ) // Кнопка для остановки таймера
             .addAction(
                 0,
-                "Отмена",
-                ServiceHelper.cancelPendingIntent(context)
+                "Сброс",
+                ServiceHelper.resetPendingIntent(context)
             ) // Кнопка для сброса таймера
             .setContentIntent(ServiceHelper.clickPendingIntent(context)) // Открывает MainActivity при нажатии на уведомление
             .setProgress(100, 0, false)
@@ -69,7 +66,7 @@ class NotificationActions @Inject constructor(@ApplicationContext private val co
     fun getPauseAction() = NotificationCompat.Action(
         0,
         "Пауза",
-        ServiceHelper.stopPendingIntent(context)
+        ServiceHelper.pausePendingIntent(context)
     )
 
     fun getResumeAction() = NotificationCompat.Action(
@@ -78,9 +75,9 @@ class NotificationActions @Inject constructor(@ApplicationContext private val co
         ServiceHelper.resumePendingIntent(context)
     )
 
-    fun getCancelAction() = NotificationCompat.Action(
+    fun getResetAction() = NotificationCompat.Action(
         0,
-        "Отмена",
-        ServiceHelper.cancelPendingIntent(context)
+        "Сброс",
+        ServiceHelper.resetPendingIntent(context)
     )
 }

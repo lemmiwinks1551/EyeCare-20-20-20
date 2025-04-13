@@ -1,10 +1,12 @@
 package com.example.eyecare20_20_20.utils
 
 object Constants {
-    const val INITIAL_DURATION_MS = 20L * 60L * 1000L
+    // const val INITIAL_DURATION_MS = 20L * 60L * 1000L
+    const val INITIAL_DURATION_MS = 5000L
     const val ACTION_SERVICE_START = "ACTION_SERVICE_START"
     const val ACTION_SERVICE_PAUSE = "ACTION_SERVICE_PAUSE"
     const val ACTION_SERVICE_CANCEL = "ACTION_SERVICE_CANCEL"
+    const val ACTION_SERVICE_RESET = "ACTION_SERVICE_RESET"
 
     const val TIMER_STATE = "TIMER_STATE"
 
@@ -16,4 +18,5 @@ object Constants {
     const val CANCEL_REQUEST_CODE = 101
     const val PAUSE_REQUEST_CODE = 102
     const val RESUME_REQUEST_CODE = 103
+    const val RESER_REQUEST_CODE = 104
 }
