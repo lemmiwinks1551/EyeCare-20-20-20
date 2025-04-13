@@ -1,4 +1,4 @@
-package com.example.eyecare20_20_20.model
+package com.example.eyecare20_20_20.domain.model
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

@@ -1,4 +1,4 @@
-package com.example.eyecare20_20_20.ui.theme
+package com.example.eyecare20_20_20.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build

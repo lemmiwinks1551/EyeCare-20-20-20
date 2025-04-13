@@ -1,4 +1,4 @@
-package com.example.eyecare20_20_20.ui.screens.home
+package com.example.eyecare20_20_20.presentation.ui.screens.home
 
 import android.content.Context
 import androidx.compose.foundation.Canvas
@@ -26,12 +26,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.eyecare20_20_20.model.HomeMviState
+import com.example.eyecare20_20_20.domain.model.HomeMviState
 import com.example.eyecare20_20_20.service.ServiceHelper
 import com.example.eyecare20_20_20.service.TimerService
 import com.example.eyecare20_20_20.service.TimerState
-import com.example.eyecare20_20_20.ui.theme.Purple40
-import com.example.eyecare20_20_20.ui.theme.PurpleGrey40
+import com.example.eyecare20_20_20.presentation.ui.theme.Purple40
+import com.example.eyecare20_20_20.presentation.ui.theme.PurpleGrey40
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START

@@ -6,25 +6,22 @@ import android.app.Service
 import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Binder
+import android.os.CountDownTimer
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.NotificationCompat
 import com.example.eyecare20_20_20.di.NotificationActions
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_CANCEL
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_PAUSE
 import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_START
-import com.example.eyecare20_20_20.utils.Constants.ACTION_SERVICE_TIMEOUT
-import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MINUTES
+import com.example.eyecare20_20_20.utils.Constants.INITIAL_DURATION_MS
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_ID
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_NAME
 import com.example.eyecare20_20_20.utils.Constants.NOTIFICATION_ID
 import com.example.eyecare20_20_20.utils.Constants.TIMER_STATE
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Timer
 import javax.inject.Inject
-import kotlin.concurrent.fixedRateTimer
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Duration.Companion.seconds
+import kotlin.math.floor
 
 @AndroidEntryPoint
 class TimerService : Service() {
@@ -38,11 +35,12 @@ class TimerService : Service() {
     lateinit var notificationActions: NotificationActions
 
     private val binder = TimerBinder()
-    private var duration: Duration = INITIAL_DURATION_MINUTES.minutes
-    private lateinit var timer: Timer
+    private var duration = INITIAL_DURATION_MS
+    private lateinit var countDownTimer: CountDownTimer
 
-    var minutes = mutableStateOf(duration.inWholeMinutes.toString())
+    var minutes = mutableStateOf("20")
     var seconds = mutableStateOf("00")
+
     var currentState = mutableStateOf(TimerState.Idle)
     var progress: Float = 1f
 
@@ -54,9 +52,7 @@ class TimerService : Service() {
             TimerState.Started.name -> {
                 setStopButton()
                 startForegroundService()
-                startTimer { minutes, seconds ->
-                    updateNotification(minutes = minutes, seconds = seconds)
-                }
+                startTimer()
             }
 
             TimerState.Paused.name -> {
@@ -77,9 +73,7 @@ class TimerService : Service() {
                 ACTION_SERVICE_START -> {
                     setStopButton()
                     startForegroundService()
-                    startTimer { minutes, seconds ->
-                        updateNotification(minutes = minutes, seconds = seconds)
-                    }
+                    startTimer()
                 }
 
                 ACTION_SERVICE_PAUSE -> {
@@ -92,69 +86,86 @@ class TimerService : Service() {
                     stopForegroundService()
                     progress = 1f
                 }
-
-                ACTION_SERVICE_TIMEOUT -> {
-                    playTimerEndSound()
-                    pauseTimer()
-                    timeoutTimer()
-                    setStartButton()
-                }
             }
         }
+
         return super.onStartCommand(intent, flags, startId)
     }
 
-    private fun startTimer(onTick: (m: String, s: String) -> Unit) {
-        if (this::timer.isInitialized) {
+    private fun startTimer() {
+        if (this::countDownTimer.isInitialized) {
             // Чтобы не было двух таймеров параллельно - отменяем другой
-            timer.cancel()
+            countDownTimer.cancel()
         }
 
         currentState.value = TimerState.Started
 
-        timer = fixedRateTimer(initialDelay = 1000L, period = 1000L) {
-            duration = duration.minus(1.seconds)
+        countDownTimer = object : CountDownTimer(
+            INITIAL_DURATION_MS,
+            1000L
+        ) {
+            override fun onTick(p0: Long) {
+                // Пересчитываем время (защита от отрицательного значения)
+                duration = maxOf(0, p0)
 
-            updateTimeUnits()
-            calculateProgress()
-            onTick(minutes.value, seconds.value)
+                // Вычисляем прогресс
+                calculateProgress()
 
-            if (duration.inWholeSeconds == 0L) {
-                this.cancel()
-                ServiceHelper.triggerForegroundService(
-                    context = this@TimerService.applicationContext,
-                    action = ACTION_SERVICE_TIMEOUT
-                )
+                // Обновляем минуты, секунды и прогресс в нотификации
+                updateTimeUnits()
+
+                // Обновляем UI в нотификации
+                updateNotification()
+            }
+
+            override fun onFinish() {
+                Log.i("countDownTimer", "$duration")
+                onTimerEnd()
             }
         }
+
+        countDownTimer.start()
+    }
+
+    private fun onTimerEnd() {
+        progress = 0f
+
+        playTimerEndSound()
+        timeoutTimer()
+        updateNotification()
+        setStartButton()
     }
 
     private fun pauseTimer() {
-        if (this::timer.isInitialized) {
-            timer.cancel()
+        if (this::countDownTimer.isInitialized) {
+            countDownTimer.cancel()
         }
         currentState.value = TimerState.Paused
     }
 
     private fun cancelTimer() {
-        if (this::timer.isInitialized) {
-            timer.cancel()
+        if (this::countDownTimer.isInitialized) {
+            countDownTimer.cancel()
         }
-        duration = INITIAL_DURATION_MINUTES.minutes
+        duration = INITIAL_DURATION_MS
         currentState.value = TimerState.Idle
         updateTimeUnits()
     }
 
     private fun timeoutTimer() {
-        duration = INITIAL_DURATION_MINUTES.minutes
+        countDownTimer.cancel()
+        duration = INITIAL_DURATION_MS
         currentState.value = TimerState.Timeout
     }
 
     private fun updateTimeUnits() {
-        duration.toComponents { minutes, seconds, _ ->
-            this@TimerService.minutes.value = minutes.toString()
-            this@TimerService.seconds.value = if (seconds < 10) "0$seconds" else seconds.toString()
-        }
+        // Обновляем минуты и секунды в удобный формат
+        val totalSeconds = duration / 1000
+        val m = totalSeconds / 60
+        val s = totalSeconds % 60
+
+        minutes.value = if(m < 10) "0$m" else m.toString()
+        seconds.value = if(s < 10) "0$s" else s.toString()
     }
 
     private fun startForegroundService() {
@@ -180,12 +191,13 @@ class TimerService : Service() {
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun updateNotification(minutes: String, seconds: String) {
-        /** Обновляет контент в уведомление по id */
+    private fun updateNotification() {
+        /** Обновляет контент в уведомлении по id */
+
         notificationManager.notify(
             NOTIFICATION_ID,
             notificationBuilder.setContentText(
-                "$minutes:$seconds",
+                "${minutes.value}:${seconds.value}",
             )
                 .setProgress(100, (progress * 100).toInt(), false)
                 .build()
@@ -233,7 +245,7 @@ class TimerService : Service() {
 
     private fun calculateProgress() {
         // Вычислить прогресс в % для отрисовки
-        progress = duration.inWholeSeconds.toFloat() / (INITIAL_DURATION_MINUTES.toFloat() * 60f)
+        progress = duration.toFloat() / INITIAL_DURATION_MS.toFloat()
     }
 }
 

@@ -1,4 +1,4 @@
-package com.example.eyecare20_20_20.ui.screens.settings
+package com.example.eyecare20_20_20.presentation.ui.screens.settings
 
 import android.Manifest
 import android.content.Context
@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
-import com.example.eyecare20_20_20.model.SettingsMviState
+import com.example.eyecare20_20_20.domain.model.SettingsMviState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

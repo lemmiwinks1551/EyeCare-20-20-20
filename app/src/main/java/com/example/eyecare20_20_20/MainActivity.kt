@@ -29,13 +29,13 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.eyecare20_20_20.model.HomeMviState
+import com.example.eyecare20_20_20.domain.model.HomeMviState
+import com.example.eyecare20_20_20.presentation.ui.navigation.Routes
+import com.example.eyecare20_20_20.presentation.ui.screens.home.HomeScreen
+import com.example.eyecare20_20_20.presentation.ui.screens.home.HomeScreenViewModel
+import com.example.eyecare20_20_20.presentation.ui.screens.settings.SettingsScreen
+import com.example.eyecare20_20_20.presentation.ui.theme.EyeCare202020Theme
 import com.example.eyecare20_20_20.service.TimerService
-import com.example.eyecare20_20_20.ui.navigation.Routes
-import com.example.eyecare20_20_20.ui.screens.home.HomeScreen
-import com.example.eyecare20_20_20.ui.screens.home.HomeScreenViewModel
-import com.example.eyecare20_20_20.ui.screens.settings.SettingsScreen
-import com.example.eyecare20_20_20.ui.theme.EyeCare202020Theme
 import com.example.eyecare20_20_20.utils.getNavigationItems
 import dagger.hilt.android.AndroidEntryPoint
 

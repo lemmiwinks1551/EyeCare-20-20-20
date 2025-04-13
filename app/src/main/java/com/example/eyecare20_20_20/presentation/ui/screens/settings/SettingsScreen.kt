@@ -1,4 +1,4 @@
-package com.example.eyecare20_20_20.ui.screens.settings
+package com.example.eyecare20_20_20.presentation.ui.screens.settings
 
 import android.content.Context
 import android.content.Intent

@@ -1,7 +1,7 @@
-package com.example.eyecare20_20_20.ui.screens.home
+package com.example.eyecare20_20_20.presentation.ui.screens.home
 
 import androidx.lifecycle.ViewModel
-import com.example.eyecare20_20_20.model.HomeMviState
+import com.example.eyecare20_20_20.domain.model.HomeMviState
 import com.example.eyecare20_20_20.service.TimerService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

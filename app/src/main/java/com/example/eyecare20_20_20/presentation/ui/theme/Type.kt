@@ -1,4 +1,4 @@
-package com.example.eyecare20_20_20.ui.theme
+package com.example.eyecare20_20_20.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
