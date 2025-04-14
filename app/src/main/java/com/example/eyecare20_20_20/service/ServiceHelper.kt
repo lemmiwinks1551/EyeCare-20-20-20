@@ -6,7 +6,7 @@ import android.content.Intent
 import com.example.eyecare20_20_20.MainActivity
 import com.example.eyecare20_20_20.utils.Constants.CLICK_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.PAUSE_REQUEST_CODE
-import com.example.eyecare20_20_20.utils.Constants.RESER_REQUEST_CODE
+import com.example.eyecare20_20_20.utils.Constants.RESET_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.RESUME_REQUEST_CODE
 import com.example.eyecare20_20_20.utils.Constants.TIMER_STATE
 
@@ -58,7 +58,7 @@ object ServiceHelper {
             putExtra(TIMER_STATE, TimerState.Reset.name)
         }
         return PendingIntent.getService(
-            context, RESER_REQUEST_CODE, cancelIntent, flag
+            context, RESET_REQUEST_CODE, cancelIntent, flag
         )
     }
 }
