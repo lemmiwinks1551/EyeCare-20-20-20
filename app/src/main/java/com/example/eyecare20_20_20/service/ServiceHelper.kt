@@ -12,10 +12,6 @@ import com.example.eyecare20_20_20.utils.Constants.TIMER_STATE
 
 object ServiceHelper {
     /** Класс для управления таймером */
-
-    // Объект PendingIntent оборачивает функциональность объекта Intent, позволяя вашему приложению указать,
-    // что другое приложение должно сделать от вашего имени  в ответ на будущее действие.
-
     private const val flag = PendingIntent.FLAG_IMMUTABLE
 
     /**
@@ -54,6 +50,9 @@ object ServiceHelper {
         )
     }
 
+    /**
+     * Создает PendingIntent для сброса таймера (передает в сервис состояние "Reset").
+     */
     fun resetPendingIntent(context: Context): PendingIntent {
         val cancelIntent = Intent(context, TimerService::class.java).apply {
             putExtra(TIMER_STATE, TimerState.Reset.name)
@@ -61,16 +60,5 @@ object ServiceHelper {
         return PendingIntent.getService(
             context, RESER_REQUEST_CODE, cancelIntent, flag
         )
-    }
-
-    /**
-     * Запускает ForegroundService с заданным action
-     * Используется для управления состоянием таймера через сервис
-     */
-    fun triggerForegroundService(context: Context, action: String) {
-        Intent(context, TimerService::class.java).apply {
-            this.action = action
-            context.startService(this)
-        }
     }
 }
