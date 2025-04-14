@@ -224,7 +224,6 @@ class TimerService : Service() {
         setStopButton()
         startForegroundService()
         startTimer()
-        currentState.value = TimerState.Started
     }
 
     private fun pauseButtonClick() {
@@ -243,6 +242,7 @@ class TimerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         serviceScope.cancel()
+        countDownTimer.cancel()
     }
 }
 
