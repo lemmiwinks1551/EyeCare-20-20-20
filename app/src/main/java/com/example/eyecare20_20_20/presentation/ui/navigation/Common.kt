@@ -1,4 +1,4 @@
-package com.example.eyecare20_20_20.utils
+package com.example.eyecare20_20_20.presentation.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home

@@ -36,7 +36,7 @@ import com.example.eyecare20_20_20.presentation.ui.screens.home.HomeScreenViewMo
 import com.example.eyecare20_20_20.presentation.ui.screens.settings.SettingsScreen
 import com.example.eyecare20_20_20.presentation.ui.theme.EyeCare202020Theme
 import com.example.eyecare20_20_20.service.TimerService
-import com.example.eyecare20_20_20.utils.getNavigationItems
+import com.example.eyecare20_20_20.presentation.ui.navigation.getNavigationItems
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
