@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import com.example.eyecare20_20_20.domain.model.BottomNavItem
-import com.example.eyecare20_20_20.presentation.ui.navigation.Routes
 
 fun getNavigationItems(): List<BottomNavItem> {
     return listOf(
