@@ -3,7 +3,7 @@ package com.lemmiwinks.eyecare20_20_20.di
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import com.example.eyecare20_20_20.R
+import com.lemmiwinks.eyecare20_20_20.R
 import com.lemmiwinks.eyecare20_20_20.service.ServiceHelper
 import com.lemmiwinks.eyecare20_20_20.utils.Constants.NOTIFICATION_CHANNEL_ID
 import dagger.Module

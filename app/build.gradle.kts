@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.eyecare20_20_20"
+    namespace = "com.lemmiwinks.eyecare20_20_20"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.eyecare20_20_20"
+        applicationId = "com.lemmiwinks.eyecare20_20_20"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
